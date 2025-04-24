@@ -6,8 +6,11 @@ import com.algaworks.algasensors.temperature.monitoring.domain.model.SensorMonit
 import com.algaworks.algasensors.temperature.monitoring.domain.repository.SensorMonitoringRepository;
 import io.hypersistence.tsid.TSID;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.Duration;
 
 @RestController
 @RequiredArgsConstructor
@@ -45,10 +48,16 @@ public class SensorMonitoringController {
         sensorMonitoringRepository.save(sensorMonitoring);
     }
 
+    @SneakyThrows
     @DeleteMapping("/disable")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void disable(@PathVariable TSID sensorId) {
         SensorMonitoring sensorMonitoring = findByIdOrDefault(sensorId);
+
+        if(!sensorMonitoring.getEnabled()) {
+            Thread.sleep(Duration.ofSeconds(10));
+        }
+
         sensorMonitoring.setEnabled(false);
         sensorMonitoringRepository.save(sensorMonitoring);
     }
