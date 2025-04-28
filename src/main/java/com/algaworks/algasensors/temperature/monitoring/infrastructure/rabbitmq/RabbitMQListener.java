@@ -1,6 +1,7 @@
 package com.algaworks.algasensors.temperature.monitoring.infrastructure.rabbitmq;
 
 import com.algaworks.algasensors.temperature.monitoring.api.model.TemperatureLogData;
+import com.algaworks.algasensors.temperature.monitoring.domain.service.TemperatureMonitoringService;
 import io.hypersistence.tsid.TSID;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -18,13 +19,12 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class RabbitMQListener {
 
+    private final TemperatureMonitoringService temperatureMonitoringService;
+
     @SneakyThrows
     @RabbitListener(queues = RabbitMQConfig.QUEUE)
     public void handle(@Payload TemperatureLogData temperatureLogData, @Headers Map<String, Object> headers) {
-        TSID sensorId = temperatureLogData.getSensorId();
-        Double temperature = temperatureLogData.getValue();
-        log.info(String.format("Temperature updated: SensorId %s Temp %s", sensorId, temperature));
-        log.info("Headers: " + headers);
+        temperatureMonitoringService.processTemperatureReading(temperatureLogData);
         Thread.sleep(Duration.ofSeconds(5));
     }
 
